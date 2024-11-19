@@ -9,14 +9,14 @@ const getIpFormat = () => (envVars.env === 'production' ? ':remote-addr - ' : ''
 const successResponseFormat = `${getIpFormat()}:method :url :status - :response-time ms`;
 const errorResponseFormat = `${getIpFormat()}:method :url :status - :response-time ms - message: :message - body: :body`;
 
-const successHandler = morgan(successResponseFormat, {
+const successLoggerHandler = morgan(successResponseFormat, {
   skip: (req, res) => res.statusCode >= 400,
   stream: { write: (message) => logger.info(message.trim()) },
 });
 
-const errorHandler = morgan(errorResponseFormat, {
+const errorLoggerHandler = morgan(errorResponseFormat, {
   skip: (req, res) => res.statusCode < 400,
   stream: { write: (message) => logger.error(message.trim()) },
 });
 
-export { errorHandler, successHandler };
+export { errorLoggerHandler, successLoggerHandler };

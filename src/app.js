@@ -3,17 +3,17 @@ import express from 'express';
 import helmet from 'helmet';
 import httpStatus from 'http-status';
 import passport from 'passport';
-import { errorHandler, successHandler } from './config/morgan.js';
+import { errorLoggerHandler, successLoggerHandler } from './config/morgan.js';
 import jwtStrategy from './config/passport.js';
-import { errorConverter } from './middlewares/error.js';
+import { errorConverter, errorHandler } from './middlewares/error.js';
 import routes from './routes/index.js';
 import ApiError from './utils/ApiError.js';
 
 const app = express();
 
 // handle error and success
-app.use(errorHandler);
-app.use(successHandler);
+app.use(errorLoggerHandler);
+app.use(successLoggerHandler);
 
 // set security HTTP headers
 app.use(helmet());
@@ -39,5 +39,7 @@ app.use((req, res, next) => {
 
 // convert error to ApiError, if needed
 app.use(errorConverter);
+// handle api error
+app.use(errorHandler);
 
 export default app;

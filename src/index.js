@@ -1,21 +1,27 @@
 import app from './app.js';
 import logger from './config/logger.js';
+import sequelize from './config/sequelize.js';
+import models from './models/index.js';
 
 let server;
 const PORT = 3000;
 
-// mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
-//   logger.info('Connected to MongoDB');
-//   server = app.listen(config.port, () => {
-//     logger.info(`Listening to port ${config.port}`);
-//   });
-// });
-
-// TODO run app after started db service
-logger.info('Should validate this sheet');
-server = app.listen(PORT, () => {
-  logger.info(`Listening to port ${PORT}`);
-});
+sequelize
+  .authenticate()
+  .then(() => {
+    logger.info('Connected to database');
+    models.User.sync().then((response) => {
+      console.log('-- response', response);
+    });
+  })
+  .then(() => {
+    server = app.listen(PORT, () => {
+      logger.info(`Listening to port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    logger.error('Failed to connect to database or create entities', error);
+  });
 
 const exitHandler = () => {
   if (server) {
