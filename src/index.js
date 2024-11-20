@@ -6,21 +6,40 @@ import { createAdminUser } from './seed/seed.js';
 
 let server;
 const PORT = 3000;
+const MAX_RETRIES = 5;
+const RETRY_DELAY = 5000;
 
-sequelize
-  .authenticate()
-  .then(() => {
-    logger.info('Connected to database');
-    models.User.sync().then(createAdminUser);
-  })
-  .then(() => {
-    server = app.listen(PORT, () => {
-      logger.info(`Listening to port ${PORT}`);
-    });
-  })
-  .catch((error) => {
-    logger.error('Failed to connect to database or create entities', error);
-  });
+const startServer = async () => {
+  let retries = 0;
+  
+  while (retries < MAX_RETRIES) {
+    try {
+      await sequelize.authenticate();
+      logger.info('Connected to database');
+
+      await models.User.sync();
+      await createAdminUser();
+
+      server = app.listen(PORT, () => {
+        logger.info(`Listening on port ${PORT}`);
+      });
+      return;
+    } catch (error) {
+      retries++;
+      logger.error(`Failed to connect to the database, attempt ${retries}/${MAX_RETRIES}`, error);
+      
+      if (retries < MAX_RETRIES) {
+        logger.info(`Retrying in ${RETRY_DELAY / 1000} seconds...`);
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY)); 
+      } else {
+        logger.error('Max retries reached, exiting application');
+        process.exit(1);
+      }
+    }
+  }
+};
+
+startServer();
 
 const exitHandler = () => {
   if (server) {
