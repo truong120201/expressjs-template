@@ -9,10 +9,10 @@
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check **/*.js",
     "prettier:fix": "prettier --write **/*.js",
-    "docker:dev": "sudo docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml up",
-    "docker:dev:build": "sudo docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml up --build",
-    "docker:prod": "sudo docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up",
-    "docker:prod:build": "sudo docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up --build"
+    "docker:dev": "docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml up",
+    "docker:dev:build": "docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml up --build",
+    "docker:prod": "docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up",
+    "docker:prod:build": "docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up --build"
   },
   "type": "module",
   "eslintConfig": {
