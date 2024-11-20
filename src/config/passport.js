@@ -1,11 +1,10 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import User from '../models/user.model.js';
+import envVars from './envConfig.js';
 import tokenTypes from './tokens.js';
-// import envVars from './envConfig';
-// import { User } from ('../models');
 
 const jwtOptions = {
-  // secretOrKey: envVars.JWT_SECRET,
-  secretOrKey: 'this is a very hard secret key',
+  secretOrKey: envVars.JWT_SECRET,
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
 };
 
@@ -14,9 +13,7 @@ const jwtVerify = async (payload, done) => {
     if (payload.type !== tokenTypes.ACCESS) {
       throw new Error('Invalid token type');
     }
-    // TODO: models
-    // const user = await User.findById(payload.sub);
-    const user = {};
+    const user = await User.findOne({ where: { id: payload.sub } });
     if (!user) {
       return done(null, false);
     }

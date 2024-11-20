@@ -2,6 +2,7 @@ import app from './app.js';
 import logger from './config/logger.js';
 import sequelize from './config/sequelize.js';
 import models from './models/index.js';
+import { createAdminUser } from './seed/seed.js';
 
 let server;
 const PORT = 3000;
@@ -10,9 +11,7 @@ sequelize
   .authenticate()
   .then(() => {
     logger.info('Connected to database');
-    models.User.sync().then((response) => {
-      console.log('-- response', response);
-    });
+    models.User.sync().then(createAdminUser);
   })
   .then(() => {
     server = app.listen(PORT, () => {

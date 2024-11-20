@@ -15,6 +15,9 @@ const envVarsSchema = Joi.object()
     JWT_REFRESH_EXPIRATION_DAY: Joi.number().default(30),
     JWT_RESET_PASSWORD_MINUTES: Joi.number().default(10),
     JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: Joi.number().default(10),
+    INITIAL_ADMIN_USERNAME: Joi.string().required(),
+    INITIAL_ADMIN_EMAIL: Joi.string().email().required(),
+    INITIAL_ADMIN_PASSWORD: Joi.string().required(),
   })
   .unknown();
 

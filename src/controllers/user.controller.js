@@ -1,22 +1,16 @@
 import httpStatus from 'http-status';
 import ApiError from '../utils/ApiError.js';
 import catchAsync from '../utils/catchAsync.js';
-// import { userService } from'../services';
+import userService from'../services/user.service.js';
 import User from '../models/user.model.js';
 
-const createUser = catchAsync(async (req, res) => {
-  // const user = await userService.createUser(req.body);
-  // res.status(httpStatus.CREATED).send(user);
-  try {
-    const user = await User.create(req.body);
-    res.status(httpStatus.CREATED).send(user);
-  } catch (error) {
-    throw new ApiError(httpStatus.BAD_REQUEST, JSON.stringify(error.errors));
-  }
+const getUsers = catchAsync(async (req, res) => {
+  const userPagination = await userService.getUsers(req.query)
+  res.send(userPagination);
 });
 
 export default {
-  createUser,
+  getUsers,
 };
 
 // const getUsers = catchAsync(async (req, res) => {
