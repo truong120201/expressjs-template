@@ -9,37 +9,45 @@ import { errorConverter, errorHandler } from './middlewares/error.js';
 import routes from './routes/index.js';
 import ApiError from './utils/ApiError.js';
 
-const app = express();
+class App {
+  constructor() {
+    this.app = express();
+    this.initializeMiddlewares();
+    this.initializePassport();
+    this.initializeRoutes();
+    this.initializeErrorHandling();
+  }
 
-// handle error and success
-app.use(errorLoggerHandler);
-app.use(successLoggerHandler);
+  initializeMiddlewares() {
+    this.app.use(errorLoggerHandler);
+    this.app.use(successLoggerHandler);
+    this.app.use(helmet());
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(cors());
+    this.app.options('*', cors());
+  }
 
-// set security HTTP headers
-app.use(helmet());
+  initializePassport() {
+    this.app.use(passport.initialize());
+    passport.use('jwt', jwtStrategy);
+  }
 
-// parse json request body
-app.use(express.json());
-// parse urlencoded request body
-app.use(express.urlencoded({ extended: true }));
+  initializeRoutes() {
+    this.app.use('/v1', routes);
+    this.app.use((req, res, next) => {
+      next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
+    });
+  }
 
-// enable cors
-app.use(cors());
-app.options('*', cors());
+  initializeErrorHandling() {
+    this.app.use(errorConverter);
+    this.app.use(errorHandler);
+  }
 
-// jwt authentication
-app.use(passport.initialize());
-passport.use('jwt', jwtStrategy);
+  getInstance() {
+    return this.app;
+  }
+}
 
-app.use('/v1', routes);
-
-app.use((req, res, next) => {
-  next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
-});
-
-// convert error to ApiError, if needed
-app.use(errorConverter);
-// handle api error
-app.use(errorHandler);
-
-export default app;
+export default new App().getInstance();

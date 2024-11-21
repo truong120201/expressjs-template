@@ -2,67 +2,70 @@ import app from './app.js';
 import logger from './config/logger.js';
 import sequelize from './config/sequelize.js';
 import models from './models/index.js';
-import { createAdminUser } from './seed/seed.js';
+import userSeeder from './seeds/user.seed.js';
 
-let server;
-const PORT = 3000;
-const MAX_RETRIES = 5;
-const RETRY_DELAY = 5000;
+class Server {
+  constructor(port = 3000, maxRetries = 5, retryDelay = 5000) {
+    this.port = port;
+    this.maxRetries = maxRetries;
+    this.retryDelay = retryDelay;
+    this.server = null;
+    this.retries = 0;
+  }
 
-const startServer = async () => {
-  let retries = 0;
-  
-  while (retries < MAX_RETRIES) {
-    try {
-      await sequelize.authenticate();
-      logger.info('Connected to database');
+  async start() {
+    while (this.retries < this.maxRetries) {
+      try {
+        await sequelize.authenticate();
+        logger.info('Connected to database');
 
-      await models.User.sync();
-      await createAdminUser();
+        await models.User.sync();
+        await userSeeder.seed();
 
-      server = app.listen(PORT, () => {
-        logger.info(`Listening on port ${PORT}`);
-      });
-      return;
-    } catch (error) {
-      retries++;
-      logger.error(`Failed to connect to the database, attempt ${retries}/${MAX_RETRIES}`, error);
-      
-      if (retries < MAX_RETRIES) {
-        logger.info(`Retrying in ${RETRY_DELAY / 1000} seconds...`);
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY)); 
-      } else {
-        logger.error('Max retries reached, exiting application');
-        process.exit(1);
+        this.server = app.listen(this.port, () => {
+          logger.info(`Listening on port ${this.port}`);
+        });
+
+        this.setupProcessHandlers();
+        return;
+      } catch (error) {
+        this.retries++;
+        logger.error(`Failed to connect to the database, attempt ${this.retries}/${this.maxRetries}`, error);
+
+        if (this.retries < this.maxRetries) {
+          logger.info(`Retrying in ${this.retryDelay / 1000} seconds...`);
+          await new Promise((resolve) => setTimeout(resolve, this.retryDelay));
+        } else {
+          logger.error('Max retries reached, exiting application');
+          process.exit(1);
+        }
       }
     }
   }
-};
 
-startServer();
+  setupProcessHandlers() {
+    process.on('uncaughtException', this.unexpectedErrorHandler.bind(this));
+    process.on('unhandledRejection', this.unexpectedErrorHandler.bind(this));
+    process.on('SIGTERM', this.shutdown.bind(this));
+  }
 
-const exitHandler = () => {
-  if (server) {
-    server.close(() => {
-      logger.info('Server closed');
+  shutdown() {
+    logger.info('SIGTERM received');
+    if (this.server) {
+      this.server.close(() => {
+        logger.info('Server closed');
+        process.exit(1);
+      });
+    } else {
       process.exit(1);
-    });
-  } else {
-    process.exit(1);
+    }
   }
-};
 
-const unexpectedErrorHandler = (error) => {
-  logger.error(error);
-  exitHandler();
-};
-
-process.on('uncaughtException', unexpectedErrorHandler);
-process.on('unhandledRejection', unexpectedErrorHandler);
-
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM received');
-  if (server) {
-    server.close();
+  unexpectedErrorHandler(error) {
+    logger.error(error);
+    this.shutdown();
   }
-});
+}
+
+const server = new Server();
+server.start();

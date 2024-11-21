@@ -2,34 +2,29 @@ import httpStatus from 'http-status';
 import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 
-/**
- * Create a user
- * @param {Object} userBody
- * @returns {Promise<User>}
- */
-const createUser = async (userBody) => {
-  if (await new User().isEmailTaken(userBody.email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-  }
-  return User.create(userBody);
-};
+class UserService {
+  constructor() {}
 
-const getUsers = async (getUserQuery) => {
-  try {
-    const { page, pageSize, orderBy, sortBy } = getUserQuery;
+  async createUser(user) {
+    if (await User.isEmailTaken(user.email)) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    }
+    return User.create(user);
+  }
+
+  async getUsers(query) {
+    const { page, pageSize, orderBy, sortBy } = query;
     return User.paginate({
       page,
       pageSize,
       order: [[orderBy, sortBy]],
       where: {},
     });
-  } catch (error) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'An error occur');
   }
-};
 
-const getUserByEmail = async (email) => {
-  return User.findOne({ where: { email } });
-};
+  async getUserByEmail(email) {
+    return User.findOne({ where: { email } });
+  };
+}
 
-export default { createUser, getUserByEmail, getUsers };
+export default new UserService();

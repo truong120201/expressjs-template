@@ -1,5 +1,5 @@
 {
-  "name": "new-express-project",
+  "name": "express-js-template",
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
@@ -15,12 +15,6 @@
     "docker:prod:build": "docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up --build"
   },
   "type": "module",
-  "eslintConfig": {
-    "parserOptions": {
-      "sourceType": "module",
-      "ecmaVersion": 2020
-    }
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",

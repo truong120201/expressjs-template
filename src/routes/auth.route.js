@@ -1,12 +1,23 @@
 import express from 'express';
 import authControllers from '../controllers/auth.controller.js';
 import validate from '../middlewares/validate.js';
-import { LoginSchema } from '../validations/auth.validation.js';
-import { createUser } from '../validations/user.validation.js';
+import authValidationSchema from '../validations/auth.validation.js';
+import userValidationSchema from '../validations/user.validation.js';
 
-const router = express.Router();
+class AuthRouter {
+  constructor() {
+    this.router = express.Router();
+    this.initializeRoutes();
+  }
 
-router.post('/register', validate(createUser), authControllers.register);
-router.post('/login', validate(LoginSchema), authControllers.login);
+  initializeRoutes() {
+    this.router.post('/register', validate(userValidationSchema.CreateUserSchema), authControllers.register);
+    this.router.post('/login', validate(authValidationSchema.LoginSchema), authControllers.login);
+  }
 
-export default router;
+  getRouter() {
+    return this.router;
+  }
+}
+
+export default new AuthRouter().getRouter();

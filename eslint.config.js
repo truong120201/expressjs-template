@@ -17,8 +17,14 @@ export default [
     plugins: {},
 
     languageOptions: {
-      ecmaVersion: 2020,
-      sourceType: 'module',
+      parserOptions: {
+        ecmaVersion: 2022,
+        ecmaFeatures: {
+          jsx: false,
+          legacyDecorators: false,
+          classProperties: true,
+        },
+      },
     },
 
     rules: {

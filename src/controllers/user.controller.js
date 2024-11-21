@@ -1,17 +1,22 @@
-import httpStatus from 'http-status';
-import ApiError from '../utils/ApiError.js';
+// import httpStatus from 'http-status';
+// import ApiError from '../utils/ApiError.js';
+import userService from '../services/user.service.js';
 import catchAsync from '../utils/catchAsync.js';
-import userService from'../services/user.service.js';
-import User from '../models/user.model.js';
+// import User from '../models/user.model.js';
 
-const getUsers = catchAsync(async (req, res) => {
-  const userPagination = await userService.getUsers(req.query)
-  res.send(userPagination);
-});
+class UserController {
+  constructor(userService) {
+    this.userService = userService;
+    this.getUsers = this.getUsers.bind(this);
+  }
 
-export default {
-  getUsers,
-};
+  getUsers = catchAsync(async (req, res) => {
+    const userPagination = await userService.getUsers(req.query);
+    res.send(userPagination);
+  });
+}
+
+export default new UserController(userService);
 
 // const getUsers = catchAsync(async (req, res) => {
 //   const filter = pick(req.query, ['name', 'role']);

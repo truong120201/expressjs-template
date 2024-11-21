@@ -2,21 +2,32 @@ import express from 'express';
 import authRoutes from './auth.route.js';
 import userRoutes from './user.route.js';
 
-const router = express.Router();
+class Router {
+  constructor() {
+    this.router = express.Router();
+    this.initializeRoutes();
+  }
 
-const defaultRoutes = [
-  {
-    path: '/user',
-    route: userRoutes,
-  },
-  {
-    path: '/auth',
-    route: authRoutes,
-  },
-];
+  initializeRoutes() {
+    const defaultRoutes = [
+      {
+        path: '/user',
+        route: userRoutes,
+      },
+      {
+        path: '/auth',
+        route: authRoutes,
+      },
+    ]
+    
+    defaultRoutes.forEach((route) => {
+      this.router.use(route.path, route.route);
+    });
+  }
 
-defaultRoutes.forEach((route) => {
-  router.use(route.path, route.route);
-});
+  getRouter() {
+    return this.router;
+  }
+}
 
-export default router;
+export default new Router().getRouter();

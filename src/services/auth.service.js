@@ -4,21 +4,19 @@ import ApiError from '../utils/ApiError.js';
 import userService from './user.service.js';
 // import tokenTypes from '../config/tokens.js';
 
-/**
- * Login with username and password
- * @param {string} email
- * @param {string} password
- * @returns {Promise<User>}
- */
-const loginUserWithEmailAndPassword = async (email, password) => {
-  const user = await userService.getUserByEmail(email);
-  if (!user || !(await user.validatePassword(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
-  }
-  return user;
-};
+class AuthService {
+  constructor() {}
 
-export default { loginUserWithEmailAndPassword };
+  async loginUserWithEmailAndPassword(email, password) {
+    const user = await userService.getUserByEmail(email);
+    if (!user || !(await user.validatePassword(password))) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+    }
+    return user;
+  }
+}
+
+export default new AuthService();
 
 // /**
 //  * Logout
