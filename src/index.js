@@ -1,8 +1,7 @@
 import app from './app.js';
 import logger from './config/logger.js';
 import sequelize from './config/sequelize.js';
-import models from './models/index.js';
-import userSeeder from './seeds/user.seed.js';
+import appModels from './models/index.js';
 
 class Server {
   constructor(port = 3000, maxRetries = 5, retryDelay = 5000) {
@@ -19,8 +18,7 @@ class Server {
         await sequelize.authenticate();
         logger.info('Connected to database');
 
-        await models.User.sync();
-        await userSeeder.seed();
+        await appModels.syncModels();
 
         this.server = app.listen(this.port, () => {
           logger.info(`Listening on port ${this.port}`);
